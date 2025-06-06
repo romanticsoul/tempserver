@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Media {
+  kp_id             Int             @id
+  imdb_id           String?         @unique
+  tmdb_id           Int?            @unique
+  title             String
+  description       String
+  short_description String?
+  slogan            String?
+  type              MediaType
+  is_series         Boolean?
+  status            Status?
+  year              Int
+  rating_kp         Float
+  rating_age        Int?
+  rating_imdb       Float?
+  rating_tmdb       Float?
+  votes_kp          Int
+  votes_imdb        Int?
+  votes_tmdb        Int?
+  movie_length      Int?
+  poster            String
+  backdrop          String?
+  logo              String?
+  persons           PersonInMedia[]
+  top_10            Int?
+  top_250           Int?
+  series_length     Int?
+  updated_at        DateTime
+  created_at        DateTime
+
+  genres    Genre[]   @relation("MediaGenres")
+  countries Country[] @relation("MediaCountries")
+
+  @@map("media")
+}
+
+model PersonInMedia {
+  media_id    Int
+  person_id   Int
+  description String?
+  profession  String?
+
+  media  Media  @relation(fields: [media_id], references: [kp_id])
+  person Person @relation(fields: [person_id], references: [id])
+
+  @@id([media_id, person_id])
+  @@map("person_in_media")
+}
+
+model Person {
+  id    Int     @id
+  photo String?
+  name  String
+
+  appearances PersonInMedia[]
+
+  @@map("person")
+}
+
+model Genre {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  media Media[] @relation("MediaGenres")
+}
+
+model Country {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  media Media[] @relation("MediaCountries")
+}
+
+enum Status {
+  announced
+  completed
+  filming
+  post_production
+  pre_production
+}
+
+enum MediaType {
+  movie
+  tv_series
+  anime
+  cartoon
+  animated_series
+}
